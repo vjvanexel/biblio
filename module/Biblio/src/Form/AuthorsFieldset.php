@@ -11,7 +11,6 @@ use Biblio\Model\Author;
 use Zend\Form\Element;
 use Zend\Form\Fieldset;
 use Biblio\Model\Biblio;
-use Zend\Hydrator\ClassMethods as ClassMethodsHydrator;
 
 class AuthorsFieldset extends Fieldset implements \Zend\InputFilter\InputFilterProviderInterface
 {
@@ -19,24 +18,19 @@ class AuthorsFieldset extends Fieldset implements \Zend\InputFilter\InputFilterP
     {
         parent::__construct('biblio');
 
-        $this->setObject(new Author()); // changed from Biblio()
-        $this->setHydrator(new ClassMethodsHydrator(false));
+        $this->setObject(new Author());
         $this->add([
-            'name' => 'author_id', 
+            'name' => 'author_name',
+            'type' => Element\Select::class,
             'options' => [
-                'label' => 'Author ID',
+                'label' => 'Author: ',
+                'label_attributes' => [
+                    'class' => 'col-sm-1 col-md-2 col-lg-2'
+                ]
             ],
             'attributes' => [
-                'required' => 'required',
-            ],
-        ]);
-        $this->add([
-            'name' => 'author_name', 
-            'options' => [
-                'label' => 'Name of the Author',
-            ],
-            'attributes' => [
-                'required' => 'required',
+                'id' => 'authors',
+                'class' => 'combobox col-sm-2 col-md-4 col-lg-4',
             ],
         ]);
     }
@@ -48,55 +42,5 @@ class AuthorsFieldset extends Fieldset implements \Zend\InputFilter\InputFilterP
                 'required' => true,
             ]
         ];
-    }
-
-    /**
-     * Recursively populate values of attached elements and fieldsets
-     *
-     * @param  array|Traversable $data
-     * @return void
-     * @throws Exception\InvalidArgumentException
-     */
-    public function p_o_pulateValues($data)
-    {
-        /*if (!is_array($data) && !$data instanceof Traversable) {
-            throw new Exception\InvalidArgumentException(sprintf(
-                '%s expects an array or Traversable set of data; received "%s"',
-                __METHOD__,
-                (is_object($data) ? get_class($data) : gettype($data))
-            ));
-        }*/
-
-        foreach ($this->iterator as $name => $elementOrFieldset) {
-            $valueExists = array_key_exists($name, $data);
-
-            if ($elementOrFieldset instanceof FieldsetInterface) {
-                if ($valueExists && (is_array($data[$name]) || $data[$name] instanceof Traversable)) {
-                    $elementOrFieldset->populateValues($data[$name]);
-                    continue;
-                }
-
-                if ($elementOrFieldset instanceof Element\Collection) {
-                    if ($valueExists && null !== $data[$name]) {
-                        $elementOrFieldset->populateValues($data[$name]);
-                        continue;
-                    }
-
-                    /* This ensures that collections with allow_remove don't re-create child
-                     * elements if they all were removed */
-                    $elementOrFieldset->populateValues([]);
-                    continue;
-                }
-            }
-
-            if ($valueExists) {
-                if (is_array($data)){
-                    $elementOrFieldset->setValue($data[$name]); // instead of $data[$name]
-                }
-                if (is_object($data)){
-                    $elementOrFieldset->setValue($data->$name); // instead of $data[$name]
-                }
-            }
-        }
     }
 }

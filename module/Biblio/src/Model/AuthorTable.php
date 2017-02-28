@@ -7,7 +7,6 @@
  */
 namespace Biblio\Model;
 
-use RuntimeException;
 use Zend\Db\TableGateway\TableGateway;
 
 class AuthorTable
@@ -22,14 +21,17 @@ class AuthorTable
     public function saveAuthor(Author $author)
     {
         $data = $author->getArrayCopy();
-        if (!$data['author_id']) {
-            $data['author_id'] = 'new_' . $data['author_name'];
-            // TODO: Add auto-increment integer id field to authors. 
-            // TODO: When adding new author check whether authors with similar name already exists.
+        if (array_key_exists('position', $data)) {
+            unset($data['position']);
+        }
+        if (!isset($data['author_id'])) {
             $this->authorsGateway->insert($data);
+            $authorId = $this->authorsGateway->adapter->driver->getLastGeneratedValue();
         } else {
+            $authorId = $author->author_id;
             $this->authorsGateway->update(['author_name' => $data['author_name']], ['author_id' => $data['author_id']]);
         }
+        return $authorId;
     }
 
     public function getAuthors($id = null)

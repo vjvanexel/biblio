@@ -7,11 +7,9 @@
  */
 namespace Biblio\Form;
 
-use Biblio\Form\PointsFieldset;
 use Zend\Form\Form;
 use Zend\Form\Element;
 use Zend\InputFilter\InputFilter;
-use Biblio\Form\RouteFieldset;
 
 class AuthorForm extends Form
 {
@@ -28,7 +26,7 @@ class AuthorForm extends Form
             'type' => 'text',
             'attributes' => [
                 'id' => 'author_id',
-                'class' => 'col-sm-9 col-md-9 col-lg-9',
+                'class' => 'col-sm-1 col-md-1 col-lg-1',
                 'readonly' => true,
             ],
             'options' => [
@@ -38,11 +36,12 @@ class AuthorForm extends Form
                 ]
             ],
 
-        ]);$this->add([
+        ]);
+        $this->add([
             'name' => 'author_name',
-            'type' => Element\Select::class,
+            'type' => 'text',
             'attributes' => [
-                'id' => 'combobox',
+                'id' => 'name',
                 'class' => 'col-sm-3 col-md-3 col-lg-3'
             ],
             'options' => [

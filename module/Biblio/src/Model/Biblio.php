@@ -26,38 +26,34 @@ class Biblio implements InputFilterAwareInterface
     public $issue;
     public $pages;
     public $publish_info;
-    public $author_id;
-    public $author_ids;
     public $authors;
-    public $author_name;
-    public $author_names;
     public $position;
 
     private $inputFilter;
 
     public function exchangeArray(array $data)
     {
-        $this->bibliog_id = !empty($data['bibliog_id']) ? $data['bibliog_id'] : null;
-        $this->edited = !empty($data['edited']) ? $data['edited'] : 0;
-        $this->year = !empty($data['year']) ? $data['year'] : null;
-        $this->title = !empty($data['title']) ? $data['title'] : null;
-        $this->journal = !empty($data['journal']) ? $data['journal'] : null;
-        $this->issue = !empty($data['issue']) ? $data['issue'] : null;
-        $this->pages = !empty($data['pages']) ? $data['pages'] : null;
-        $this->series = !empty($data['series']) ? $data['series'] : null;
-        $this->series_vol = !empty($data['series_vol']) ? $data['series_vol'] : null;
+        $this->bibliog_id   = !empty($data['bibliog_id']) ? $data['bibliog_id'] : null;
+        $this->edited       = !empty($data['edited']) ? $data['edited'] : 0;
+        $this->year         = !empty($data['year']) ? $data['year'] : null;
+        $this->title        = !empty($data['title']) ? $data['title'] : null;
+        $this->journal      = !empty($data['journal']) ? trim($data['journal']) : null;
+        $this->issue        = !empty($data['issue']) ? $data['issue'] : null;
+        $this->pages        = !empty($data['pages']) ? $data['pages'] : null;
+        $this->series       = !empty($data['series']) ? $data['series'] : null;
+        $this->series_vol   = !empty($data['series_vol']) ? $data['series_vol'] : null;
         $this->publish_info = !empty($data['publish_info']) ? $data['publish_info'] : null;
-        //$this->author_id = !empty($data['author_id']) ? $data['author_id'] : null;
-        //$this->author_ids = !empty($data['author_ids']) ? $data['author_ids'] : null;
-        $this->authors = !empty($data['authors']) ? $data['authors'] : null;
-        foreach ($this->authors as $key => $authorInfo) {
-            if (is_array($authorInfo)){
-                $author = new Author();
-                $author->exchangeArray($authorInfo);
-                $this->authors[$key] = $author;
+        // Convert data into author objects 
+        if (!empty($data['authors'])) {
+            foreach ($data['authors'] as $key => $authorInfo) {
+                if (is_array($authorInfo)) {
+                    $author = new Author();
+                    $author->exchangeArray($authorInfo);
+                    $this->authors[$key] = $author;
+                }
             }
         }
-        if (!empty($data['author_names'] && !empty($data['author_ids']))) {
+        if (empty($this->authors) && isset($data['author_names']) && isset($data['author_ids'])) {
             if (strpos($data['author_ids'], ',')) {
                 $authorIds = explode(',', $data['author_ids']);
                 $authorNames = explode('. ,', $data['author_names']);
@@ -86,9 +82,6 @@ class Biblio implements InputFilterAwareInterface
                 $this->authors = [$singleAuthor];
             }
         }
-        $this->author_name = !empty($data['author_name']) ? $data['author_name'] : null;
-        $this->author_names = !empty($data['author_names']) ? $data['author_names'] : null;
-        $this->position = !empty($data['position']) ? $data['position'] : null;
 
         return $this;
     }
@@ -105,12 +98,7 @@ class Biblio implements InputFilterAwareInterface
             'series' => $this->series,
             'series_vol' => $this->series_vol,
             'publish_info' => $this->publish_info,
-            'author_id' => $this->author_id,
-            'author_ids' => $this->author_ids,
-            'author_name' => $this->author_name,
-            'author_names' => $this->author_names,
             'authors' => $this->authors,
-            'position' => $this->position,
         ];
     }
 
@@ -132,7 +120,7 @@ class Biblio implements InputFilterAwareInterface
 
         $inputFilter->add([
             'name' => 'bibliog_id',
-            'required' => true,
+            'required' => false,
             'filters' => [
                 ['name' => StripTags::class],
                 ['name' => StringTrim::class],

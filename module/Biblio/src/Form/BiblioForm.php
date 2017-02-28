@@ -33,21 +33,21 @@ class BiblioForm extends Form
             'options' => [
                 'label' => 'Bibliography ID',
                 'label_attributes' => [
-                    'class' => 'col-sm-3 col-md-3 col-lg-3'
+                    'class' => 'col-sm-1 col-md-2 col-lg-2'
                 ]
             ]
         ]);
         $this->add([
             'name' => 'edited',
-            'type' => 'text',
+            'type' => \Zend\Form\Element\Checkbox::class,
             'attributes' => [
                 'id' => '',
-                'class' => 'col-sm-9 col-md-9 col-lg-9'
+                'class' => 'col-sm-1 col-md-1 col-lg-1'
             ],
             'options' => [
-                'label' => 'Edited',
+                'label' => 'Edited / journal: ',
                 'label_attributes' => [
-                    'class' => 'col-sm-3 col-md-3 col-lg-3'
+                    'class' => 'col-sm-1 col-md-2 col-lg-2'
                 ]
             ],
         ]);
@@ -56,12 +56,12 @@ class BiblioForm extends Form
             'type' => 'text',
             'attributes' => [
                 'id' => '',
-                'class' => 'col-sm-9 col-md-9 col-lg-9'
+                'class' => 'col-sm-2 col-md-4 col-lg-4'
             ],
             'options' => [
-                'label' => 'Year',
+                'label' => 'Year: ',
                 'label_attributes' => [
-                    'class' => 'col-sm-3 col-md-3 col-lg-3'
+                    'class' => 'col-sm-1 col-md-2 col-lg-2'
                 ],
             ]
         ]);
@@ -70,12 +70,12 @@ class BiblioForm extends Form
             'type' => 'text',
             'attributes' => [
                 'id' => '',
-                'class' => 'col-sm-9 col-md-9 col-lg-9'
+                'class' => 'col-sm-3 col-md-5 col-lg-5'
             ],
             'options' => [
-                'label' => 'Title',
+                'label' => 'Title: ',
                 'label_attributes' => [
-                    'class' => 'col-sm-3 col-md-3 col-lg-3'
+                    'class' => 'col-sm-1 col-md-2 col-lg-2'
                 ],
             ]
         ]);
@@ -83,13 +83,13 @@ class BiblioForm extends Form
             'name' => 'journal',
             'type' => 'text',
             'attributes' => [
-                'id' => '',
-                'class' => 'col-sm-9 col-md-9 col-lg-9'
+                'id' => 'journal',
+                'class' => 'combobox-get col-sm-2 col-md-4 col-lg-4'
             ],
             'options' => [
-                'label' => 'Journal',
+                'label' => 'in: ',
                 'label_attributes' => [
-                    'class' => 'col-sm-3 col-md-3 col-lg-3'
+                    'class' => 'col-sm-1 col-md-2 col-lg-2'
                 ],
             ]
         ]);
@@ -98,12 +98,12 @@ class BiblioForm extends Form
             'type' => 'text',
             'attributes' => [
                 'id' => '',
-                'class' => 'col-sm-9 col-md-9 col-lg-9'
+                'class' => 'col-sm-2 col-md-4 col-lg-4'
             ],
             'options' => [
-                'label' => 'Issue',
+                'label' => 'Issue: ',
                 'label_attributes' => [
-                    'class' => 'col-sm-3 col-md-3 col-lg-3'
+                    'class' => 'col-sm-1 col-md-2 col-lg-2'
                 ],
             ]
         ]);
@@ -112,12 +112,12 @@ class BiblioForm extends Form
             'type' => 'text',
             'attributes' => [
                 'id' => '',
-                'class' => 'col-sm-9 col-md-9 col-lg-9'
+                'class' => 'col-sm-1 col-md-4 col-lg-4'
             ],
             'options' => [
-                'label' => 'Series',
+                'label' => 'Series: ',
                 'label_attributes' => [
-                    'class' => 'col-sm-3 col-md-3 col-lg-3'
+                    'class' => 'col-sm-1 col-md-2 col-lg-2'
                 ],
             ]
         ]);
@@ -126,12 +126,12 @@ class BiblioForm extends Form
             'type' => 'text',
             'attributes' => [
                 'id' => '',
-                'class' => 'col-sm-9 col-md-9 col-lg-9'
+                'class' => 'col-sm-2 col-md-4 col-lg-4'
             ],
             'options' => [
-                'label' => 'Series vol. nr.',
+                'label' => 'Series vol. nr.: ',
                 'label_attributes' => [
-                    'class' => 'col-sm-3 col-md-3 col-lg-3'
+                    'class' => 'col-sm-1 col-md-2 col-lg-2'
                 ],
             ]
         ]);
@@ -140,12 +140,12 @@ class BiblioForm extends Form
             'type' => 'text',
             'attributes' => [
                 'id' => '',
-                'class' => 'col-sm-9 col-md-9 col-lg-9'
+                'class' => 'col-sm-2 col-md-4 col-lg-4'
             ],
             'options' => [
-                'label' => 'Pages',
+                'label' => 'Pages: ',
                 'label_attributes' => [
-                    'class' => 'col-sm-3 col-md-3 col-lg-3'
+                    'class' => 'col-sm-1 col-md-2 col-lg-2'
                 ],
             ]
         ]);
@@ -154,12 +154,12 @@ class BiblioForm extends Form
             'type' => 'text',
             'attributes' => [
                 'id' => '',
-                'class' => 'col-sm-9 col-md-9 col-lg-9'
+                'class' => 'col-sm-3 col-md-6 col-lg-6'
             ],
             'options' => [
                 'label' => 'Publishing Info',
                 'label_attributes' => [
-                    'class' => 'col-sm-3 col-md-3 col-lg-3'
+                    'class' => 'col-sm-1 col-md-2 col-lg-2'
                 ],
             ]
         ]);
@@ -193,5 +193,4 @@ class BiblioForm extends Form
             ],
         ]);
     }
-
 }
