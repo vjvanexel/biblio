@@ -19,13 +19,15 @@ class Author implements InputFilterAwareInterface
 {
     public $author_id;
     public $author_name;
+    public $position;
 
     private $inputFilter;
 
     public function exchangeArray(array $data)
     {
-        $this->author_id = $data['author_id'] ? $data['author_id'] : null;
-        $this->author_name = $data['author_name'] ? $data['author_name'] : null;
+        $this->author_id = isset($data['author_id']) ? $data['author_id'] : null;
+        $this->author_name = isset($data['author_name']) ? $data['author_name'] : null;
+        $this->position = isset($data['position']) ? $data['position'] : null;
     }
 
     public function getArrayCopy()
@@ -33,6 +35,7 @@ class Author implements InputFilterAwareInterface
         return [
             'author_id' => $this->author_id,
             'author_name' => $this->author_name,
+            'position' => $this->position,
         ];
     }
 

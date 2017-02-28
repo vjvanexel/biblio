@@ -2,7 +2,6 @@
 $title = "Edit bibliographic information";
 $this->headTitle($title);
 ?>
-<?= $this->headScript()->appendFile($this->basePath('js/Site/leaffunctions.js')) ?>
     <h1><?= $this->escapeHtml($title) ?></h1>
 <?php
 $form->setAttribute('action', $this->url('biblio', [
@@ -11,11 +10,13 @@ $form->setAttribute('action', $this->url('biblio', [
 ));
 $form->prepare();
 ?>
-
+<div>
+    <b>Tip</b>: When adding the first article from an edited volume, 
+    add the bibliographic information for the edited volume first.
+</div>
 <?php
 echo $this->form()->openTag($form);
 ?><div class='form-group'><?php
-echo $this->formRow($form->get('bibliog_id'));
 echo "<br>";
 ?></div><div class='form-group'><?php
 echo $this->formRow($form->get('edited'));
@@ -44,11 +45,12 @@ echo "<br>";
     ?></div><div class='form-group'><?php
 echo $this->formRow($form->get('pages'));
 echo "<br>";
-    ?></div><div class='form-group'><?php
-echo $this->formCollection($form->get('authors'));
-echo "<br>"; ?>
     ?></div>
-<button onclick="return add_form_element()">Add another author </button>
+<div class='form-group' id="authors"><div><?php
+echo $this->formCollection($form->get('authors'));
+?>
+</div></div>
+<button onclick="return add_form_element('authors')">Add another author </button>
 <?php
 echo $this->formElement($form->get('submit'));
 echo $this->form()->closeTag();

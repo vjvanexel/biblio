@@ -2,14 +2,7 @@
 $title = "Add new author ";
 $this->headTitle($title);
 ?>
-<?= $this->headLink()->prependStylesheet("http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css") ?>
-<?= $this->headLink()->prependStylesheet($this->basePath('css/combobox.css')) ?>
-<?= $this->headScript()->appendFile($this->basePath('js/Site/leaffunctions.js')) ?>
-<?= $this->headScript()->appendFile("https://code.jquery.com/jquery-1.12.4.js") ?>
-<?= $this->headScript()->appendFile("https://code.jquery.com/ui/1.12.1/jquery-ui.js") ?>
-<?= $this->headScript()->appendFile($this->basePath('js/combobox2.js')) ?>
-<h1><?= $this->escapeHtml($title) ?></h1>
-
+<h2><?= $this->escapeHtml($title) ?></h2>
 
 <?php
 $form->setAttribute('action', $this->url('biblio', [
@@ -21,10 +14,9 @@ $form->prepare();
 
 <?php
 echo $this->form()->openTag($form);
-?><div class='form-group'><?php
-    echo $this->formRow($form->get('author_id'));
-echo "<br>";
-?></div><div class='form-group'><?php
+?><div class='form-group'>
+<br>
+</div><div class='form-group'><?php
     echo $this->formRow($form->get('author_name'));
 echo "<br>";
 ?></div>

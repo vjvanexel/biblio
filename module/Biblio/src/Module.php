@@ -28,18 +28,27 @@ class Module implements ConfigProviderInterface
                     $bibEnriesTableGateway = $container->get(Model\BibEntriesTableGateway::class);
                     $bibAuthCrTableGateway = $container->get(Model\BibAuthCrTableGateway::class);
                     $authorTable = $container->get(Model\AuthorTable::class);
-                    //$referencesTableGateway = $container->get(Model\ReferencesTableGateway::class);
-                    return new Model\BiblioTable($bibEnriesTableGateway, $bibAuthCrTableGateway, $authorTable/*, $referencesTableGateway*/);
+                    $authorCrossTG = $container->get(Model\AuthorCrossTableGateway::class);
+                    return new Model\BiblioTable($bibEnriesTableGateway, $bibAuthCrTableGateway, $authorTable, $authorCrossTG/*, $referencesTableGateway*/);
                 },
                 Model\AuthorTable::class => function($container) {
                     $authorsTableGateway = $container->get(Model\AuthorsTableGateway::class);
                     return new Model\AuthorTable($authorsTableGateway);
+                },
+                Model\ReferencesTable::class => function($container) {
+                    $referencesTableGateway = $container->get(Model\ReferencesTableGateway::class);
+                    $biblioTable = $container->get(Model\BiblioTable::class);
+                    return new Model\ReferencesTable($referencesTableGateway, $biblioTable);
                 },
                 Model\BibAuthCrTableGateway::class => function($container) {
                     $dbAdapter = $container->get(AdapterInterface::class);
                     $resultSetPrototype = new ResultSet();
                     $resultSetPrototype->setArrayObjectPrototype(new Model\Biblio());
                     return new TableGateway('biblio_author_cross', $dbAdapter, null, $resultSetPrototype);
+                },
+                Model\AuthorCrossTableGateway::class => function($container) {
+                    $dbAdapter = $container->get(AdapterInterface::class);
+                    return new TableGateway('biblio_author_cross', $dbAdapter);
                 },
                 Model\AuthorsTableGateway::class => function($container) {
                     $dbAdapter = $container->get(AdapterInterface::class);
@@ -52,6 +61,12 @@ class Module implements ConfigProviderInterface
                     $resultSetPrototype = new ResultSet();
                     $resultSetPrototype->setArrayObjectPrototype(new Model\Biblio());
                     return new TableGateway('bibliog_entries', $dbAdapter, null, $resultSetPrototype);
+                },
+                Model\ReferencesTableGateway::class => function($container) {
+                    $dbAdapter = $container->get(AdapterInterface::class);
+                    $resultSetPrototype = new ResultSet();
+                    $resultSetPrototype->setArrayObjectPrototype(new Model\Reference());
+                    return new TableGateway('references', $dbAdapter, null, $resultSetPrototype);
                 },
                 FormElementManager::class => FormElementManagerFactory::class,
             ],

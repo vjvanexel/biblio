@@ -8,25 +8,27 @@
  */
 namespace Biblio\Model;
 
-use RuntimeException;
 use Zend\Db\Sql\Expression;
 use Zend\Db\Sql\Select;
 use Zend\Db\TableGateway\TableGateway;
 use Biblio\Model\Biblio;
 use Biblio\Model\Author;
 use Biblio\Model\AuthorTable;
+use Zend\Stdlib\ArrayUtils;
 
 class BiblioTable
 {
     private $bibEntriesGateway;
     private $bibAuthCrossGateway;
     private $authorTable;
+    private $authorCrossGateway;
 
-    public function __construct(TableGateway $bibEnriesTableGateway, TableGateway $bibAuthCrTableGateway, AuthorTable $authorTable)
+    public function __construct(TableGateway $bibEnriesTableGateway, TableGateway $bibAuthCrTableGateway, AuthorTable $authorTable, TableGateway $authorCrossTG)
     {
         $this->bibEntriesGateway = $bibEnriesTableGateway;
         $this->bibAuthCrossGateway = $bibAuthCrTableGateway;
         $this->authorTable = $authorTable;
+        $this->authorCrossGateway = $authorCrossTG;
     }
 
     public function fetchAll()
@@ -34,26 +36,39 @@ class BiblioTable
         return $this->bibAuthCrossGateway->select();
     }
 
+    /**
+     * Get bibliographic item(s)
+     *
+     * @param null $biblioId
+     * @return array $biblioReferences  Array containing Biblio object, abbreviated and full length bibliographic info.
+     */
     public function getBibliography($biblioId = null)
     {
-        $biblioSql = $this->bibAuthCrossGateway->getSql();
-        $resultSet = $this->bibAuthCrossGateway->select(
+        // Get bibliographic item data from database.
+        $mainResultSet = $this->bibEntriesGateway->select(
             function(Select $select) use ($biblioId) {
-                $select
-                    ->join('bibliog_entries', 'bibliog_entries.bibliog_id = biblio_author_cross.bibliog_id',
-                    array('bibliog_id', 'edited', 'year', 'title', 'journal', 'issue', 'pages', 'publish_info', 'series', 'series_vol'), Select::JOIN_RIGHT)
-                    ->group('bibliog_entries.bibliog_id')
-                    ->join('authors', 'biblio_author_cross.author_id = authors.author_id', array('author_name'))
-                    ->columns(array('author_id', 'author_names' => new Expression('GROUP_CONCAT(authors.author_name ORDER BY biblio_author_cross.position)'),
-                        'author_ids' => new Expression('GROUP_CONCAT(authors.author_id ORDER BY biblio_author_cross.position)')));
-                if ($biblioId) {
-                    $select->where(array('bibliog_entries.bibliog_id' => $biblioId));
+                $authorNamesSelect = new Select('biblio_author_cross');
+                $authorNamesSelect->join('authors', 'authors.author_id = biblio_author_cross.author_id', [
+                    'author_names' => new Expression('GROUP_CONCAT(authors.author_name ORDER BY biblio_author_cross.position)'),
+                    'author_ids' => new Expression('GROUP_CONCAT(authors.author_id ORDER BY biblio_author_cross.position)')
+                ], Select::JOIN_LEFT)
+                    ->group('biblio_author_cross.bibliog_id');
+                $select->join(
+                    ['c' => $authorNamesSelect], 'c.bibliog_id = bibliog_entries.bibliog_id', ['author_names','author_ids'], Select::JOIN_LEFT
+                );
+                if (!empty($biblioId)) {
+                    foreach ($biblioId as $condition) {
+                        $select->where($condition);
+                    }
                 }
             }
         );
+
+        // Convert database data to abbreviated and full length bibliographic description.
+        // TODO: refactor & add possibility to use different templates to transform data to different bibliography standards
         $biblioCollection = array();
         $biblioReferences = array();
-        foreach ($resultSet as $biblio) {
+        foreach ($mainResultSet as $biblio) {
             $biblioCollection[$biblio->bibliog_id] = $biblio;
         }
         foreach ($biblioCollection as $bibliographicId => $bibliographicItem) {
@@ -86,6 +101,9 @@ class BiblioTable
                     $fullAuthors = $fullAuthorsString;
                     $abbrevReference = $bibliographicItem->authors[0]->author_name . '<i> et al.</i>, ' . $bibliographicItem->year;
                 }
+            } elseif ($authorNumber == 0 && $bibliographicItem->edited == 1) {
+                $abbrevReference = $biblio->title;
+                $fullAuthors = $biblio->title;
             } else {
                 $fullAuthors = $bibliographicItem->authors[0]->author_name;
                 $abbrevReference = $bibliographicItem->authors[0]->author_name . ', ' . $bibliographicItem->year;
@@ -120,11 +138,14 @@ class BiblioTable
         return $biblioReferences;
     }
 
-
+    /**
+     * Save bibliographic item.
+     *
+     * @param \Biblio\Model\Biblio $biblio
+     */
     public function saveBibliography(Biblio $biblio)
     {
-        $dataRaw = $biblio->getArrayCopy();
-        $biblio_id = $dataRaw['bibliog_id'];
+        // Separate author and bibliographic item
         $entriesData = array(
             'bibliog_id' => $biblio->bibliog_id,
             'edited' => $biblio->edited,
@@ -135,65 +156,77 @@ class BiblioTable
             'series' => $biblio->series,
             'series_vol' => $biblio->series_vol,
             'publish_info' => $biblio->publish_info,
+        );
 
-        );
-        $authorsData = array(
-            'author_id' => $biblio->author_id,
-            'author_ids' => $biblio->author_ids,
-            'author_name' => $biblio->author_name,
-            'authors' => $biblio->authors,
-            'position' => $biblio->position
-        );
-        $authCrossData = array(
-            'bibliog_id' => $biblio_id,
-            'authors' => $biblio->authors
-        );
-        //$this->bibEntriesGateway->update($entriesData, ['bibliog_id' => $biblio->bibliog_id]);
-        // $this->bibAuthCrossGateway->update($authCrossData, ['bibliog_id' => $biblio->bibliog_id]);
-        // Add update authors info later: new authors, new order of authors, etc.
-        //$this->authorsGateway->update($authorsData, ['author_id' => $biblio->author_id]);
+        $entryResult = 0;
+        if (empty($biblio->bibliog_id)) {
+            $entryResult = $this->bibEntriesGateway->insert($entriesData);
+            $biblio->bibliog_id = $this->bibEntriesGateway->adapter->driver->getLastGeneratedValue();
+            if (! $entryResult == 0 && !empty($biblio->authors)) {
+                $this->saveAuthors($biblio);
+            }
+        } else {
+            unset($entriesData['bibliog_id']);
+            $this->bibEntriesGateway->update($entriesData, ['bibliog_id' => $biblio->bibliog_id]);
 
-        $entryResult = 1;
-        if (! $this->getBibliography($biblio_id)) {
-            //$entryResult = $this->bibEntriesGateway->insert($entriesData);
-            //return;
+            $storedAuthorsResult = $this->authorCrossGateway->select(['bibliog_id' => $biblio->bibliog_id]);
+            $storedAuthors = $storedAuthorsResult->toArray();
+            $this->updateAuthors($biblio, $storedAuthors);
         }
-        $authCrossResult = [];
-        if (! $entryResult == 0) {
-            foreach ($authCrossData['authors'] as $authorObj) {
-                if (count($this->authorTable->getAuthors($authorObj->author_id)) == 0) {
-                    $this->authorTable->saveAuthor($authorObj);
+    }
+
+    /**
+     * Save new and updated author information
+     */
+    private function saveAuthors($biblio) {
+        $i = 1;
+        foreach ($biblio->authors as $authorObj) {
+            if (empty($authorObj->author_id)) {
+                $this->authorTable->saveAuthor($authorObj);
+                $authorObj->author_id = $this->authorTable->driver->adapter->getLastGeneratedValue();
+            }
+            $authCrossPartialResult = $this->authorCrossGateway->insert([
+                'bibliog_id' => $biblio->bibliog_id,
+                'author_id' => $authorObj->author_id,
+                'position' => $i,
+            ]);
+        }
+    }
+
+    /**
+     * Compare authors information from form with the stored data  
+     * and create/update/delete database entries.
+     */
+    private function updateAuthors($biblio, $storedAuthors) {
+        $authorsPositions = [];
+        foreach ($storedAuthors as $storedAuthor) {
+            $authorsPositions[$storedAuthor['author_id']] = $storedAuthor['position'];
+        }
+        for ($i = 0, $size = count($biblio->authors); $i< $size; $i++) {
+            $author = $biblio->authors[$i];
+            if (array_key_exists($author->author_id, $authorsPositions)) {
+                if ($i+1 != $authorsPositions[$author->author_id]) {
+                    $this->authorCrossGateway->update(['position' => $i+1], [
+                        'bibliog_id' => $biblio->bibliog_id,
+                        'author_id' => $author->author_id
+                    ]);
                 }
-                $authCrossPartialResult = $this->bibAuthCrossGateway->insert([
-                    'bibliog_id' => $biblio_id,
-                    'author_id' => $authorObj->author_id
+                unset($authorsPositions[$author->author_id]);
+            } else {
+                $this->authorCrossGateway->insert([
+                    'bibliog_id' => $biblio->bibliog_id,
+                    'author_id' => $author->author_id,
+                    'position' => $i+1,
                 ]);
-                if (! $authCrossPartialResult == 0) {
-                    $authCrossResult['success'][$biblio_id] = $authorObj->author_id;
-                } else  {
-                    $authCrossResult['failure'][$biblio_id] = $authorObj->author_id;
+            }
+            if (!empty($authorsPositions)) {
+                foreach ($authorsPositions as $authorId => $position) {
+                    $this->authorCrossGateway->delete([
+                        'bibliog_id' => $biblio->bibliog_id,
+                        'author_id' => $authorId
+                    ]);
                 }
             }
         }
-        //$this->tableGateway->update($data, ['route_id' => $data['route_id']]);
-
-        /*$update1 = new Update('biblio_author_cross');
-        $update1->where(array('biblio_author_cross.bibliog_id' => $biblio_id))
-            ->join('bibliog_entries', 'bibliog_entries.bibliog_id = biblio_author_cross.bibliog_id',
-                array('bibliog_id', 'edited', 'year', 'title', 'journal', 'issue', 'pages', 'publish_info', 'series', 'series_vol'), Select::JOIN_RIGHT)
-            ->join('authors', 'biblio_author_cross.author_id = authors.author_id', array('author_name'))
-            ->set($data);
-        $entriesJoin = array(
-            'name' => 'bibliog_entries',
-            'on' => 'bibliog_entries.bibliog_id = biblio_author_cross.bibliog_id',
-            'type' => Select::JOIN_RIGHT
-        );
-        $authorsJoin = array(
-            'name' => 'authors',
-            'on' => 'biblio_author_cross.author_id = authors.author_id'
-        );
-        $this->bibAuthCrossGateway->update($data, array('biblio_author_cross.bibliog_id' => $biblio_id), array($entriesJoin, $authorsJoin));
-        */$break = 'halt';
     }
-
 }

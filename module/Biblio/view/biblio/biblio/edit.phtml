@@ -2,7 +2,6 @@
 $title = "Edit bibliographic information";
 $this->headTitle($title);
 ?>
-<?= $this->headScript()->appendFile($this->basePath('js/Site/leaffunctions.js')) ?>
     <h1><?= $this->escapeHtml($title) ?></h1>
 <?php
 $form->setAttribute('action', $this->url('biblio', [
