@@ -66,7 +66,7 @@ class Author implements InputFilterAwareInterface
 
         $inputFilter->add([
             'name' => 'author_name',
-            'required' => true,
+            'required' => false,
             'filters' => [
                 ['name' => StripTags::class],
                 ['name' => StringTrim::class],

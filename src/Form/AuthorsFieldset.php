@@ -39,7 +39,7 @@ class AuthorsFieldset extends Fieldset implements \Zend\InputFilter\InputFilterP
     {
         return [
             'author_name' => [
-                'required' => true,
+                'required' => false,
             ]
         ];
     }
