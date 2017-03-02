@@ -79,7 +79,10 @@ class BiblioController extends AbstractActionController
         $data['journal'] = $data['journal'][0];
         if (isset($data['authors'])) {
             for ($i=0, $size=count($data['authors']); $i < $size; $i++) {
-                $data['authors'][$i]['position'] = $i+1;
+                $data['authors'][$i] = [
+                    'author_id' => $data['authors'][$i],
+                    'position' => $i+1
+                ];
             }
         } else {
             $data['authors'] = [];
