@@ -1,0 +1,57 @@
+<?php
+$title = "Edit bibliographic information";
+$this->headTitle($title);
+?>
+    <h1><?= $this->escapeHtml($title) ?></h1>
+<?php
+$form->setAttribute('action', $this->url('biblio', [
+        'action' => 'add'
+    ]
+));
+$form->prepare();
+?>
+<div>
+    <b>Tip</b>: When adding the first article from an edited volume, 
+    add the bibliographic information for the edited volume first.
+</div>
+<?php
+echo $this->form()->openTag($form);
+?><div class='form-group'><?php
+echo "<br>";
+?></div><div class='form-group'><?php
+echo $this->formRow($form->get('edited'));
+echo "<br>";
+    ?></div><div class='form-group'><?php
+echo $this->formRow($form->get('year'));
+echo "<br>";
+    ?></div><div class='form-group'><?php
+echo $this->formRow($form->get('title'));
+echo "<br>";
+    ?></div><div class='form-group'><?php
+echo $this->formRow($form->get('journal'));
+echo "<br>";
+    ?></div><div class='form-group'><?php
+echo $this->formRow($form->get('issue'));
+echo "<br>";
+    ?></div><div class='form-group'><?php
+echo $this->formRow($form->get('series'));
+echo "<br>";
+    ?></div><div class='form-group'><?php
+echo $this->formRow($form->get('series_vol'));
+echo "<br>";
+    ?></div><div class='form-group'><?php
+echo $this->formRow($form->get('publish_info'));
+echo "<br>";
+    ?></div><div class='form-group'><?php
+echo $this->formRow($form->get('pages'));
+echo "<br>";
+    ?></div>
+<div class='form-group' id="authors"><div><?php
+echo $this->formCollection($form->get('authors'));
+?>
+</div></div>
+<button onclick="return add_form_element('authors')">Add another author </button>
+<?php
+echo $this->formElement($form->get('submit'));
+echo $this->form()->closeTag();
+?>

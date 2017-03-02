@@ -1,0 +1,23 @@
+<?php
+$title = 'Bibliography: Authors';
+$this->headTitle($title);
+?>
+<h1><?php $this->escapeHtml($title) ?></h1>
+<div id="bibliography">
+    <table class="table">
+        <tr>
+            <th>Author ID</th>
+            <th>Author name</th>
+            <th>&nbsp;</th>
+        </tr>
+    <?php foreach ($authors as $authorId => $authorInfo) { ?>
+        <tr>
+            <th><?php echo $authorInfo->author_id ?> </th>
+            <th><?php echo $authorInfo->author_name ?> </th>
+            <th><a href="<?= $this->url('biblio', ['action' => 'editAuthor', 'id' => $authorInfo->author_id]) ?>">Edit</a>
+                / Delete </th>
+        </tr>
+    <?php } ?>
+    </table>
+    <a href="<?= $this->url('biblio', ['action' => 'editAuthor']); ?>" class="btn btn-default">Add author</a>
+</div>

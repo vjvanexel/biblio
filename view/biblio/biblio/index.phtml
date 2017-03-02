@@ -1,0 +1,25 @@
+<?php
+$title = 'Bibliography';
+$this->headTitle($title);
+?>
+<h1><?php $this->escapeHtml($title) ?></h1>
+<div id="bibliography">
+    <table class="table">
+        <tr>
+            <th>Bibliography ID</th>
+            <th>Short ref. </th>
+            <th>Full reference </th>
+            <th>&nbsp;</th>
+        </tr>
+    <?php foreach ($bibliography as $bibliographyId => $bibliographicItem) { ?>
+        <tr>
+            <th><?php echo $bibliographyId?> </th>
+            <th><?php echo $bibliographicItem['abbrev'] ?> </th>
+            <th><?php echo $bibliographicItem['full'] ?> </th>
+            <th><a href="<?= $this->url('biblio', ['action' => 'edit', 'id' => $bibliographyId]) ?>">Edit</a>
+                / Delete </th>
+        </tr>
+    <?php } ?>
+    </table>
+    <a href="<?= $this->url('biblio', ['action' => 'add'])?>" class="btn btn-default">Add publication </a>
+</div>

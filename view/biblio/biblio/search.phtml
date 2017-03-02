@@ -1,0 +1,28 @@
+<h2>Searching:...<?php echo $search; ?></h2>
+<?php
+if ($results) {
+    foreach ($results as $score => $result) {
+        echo $score . ' ' . $result . '</br>';
+    }
+}
+
+if ($form) {
+    $form->prepare();
+    echo $this->form()->openTag($form);
+    echo $this->formRow($form->get('general'));
+    echo "<br>";
+//echo $this->formRow($form->get('edited'));
+//echo "<br>";
+    echo $this->formRow($form->get('year'));
+    echo "<br>";
+    echo $this->formRow($form->get('title'));
+    echo "<br>";
+    echo $this->formRow($form->get('journal'));
+    echo "<br>";
+    echo $this->formRow($form->get('authors'));
+    echo "<br>"; ?>
+    <?php
+    echo $this->formElement($form->get('submit'));
+//    echo $this->form()->closeTag();
+
+}
