@@ -104,6 +104,10 @@ class BiblioTable
             } elseif ($authorNumber == 0 && $bibliographicItem->edited == 1) {
                 $abbrevReference = $biblio->title;
                 $fullAuthors = $biblio->title;
+            } elseif ($authorNumber == 0 && $bibliographicItem->edited == 0) {
+                // This case should not really occur, but is included to be more flexible
+                $abbrevReference = $biblio->title;
+                $fullAuthors = $biblio->title;
             } else {
                 $fullAuthors = $bibliographicItem->authors[0]->author_name;
                 $abbrevReference = $bibliographicItem->authors[0]->author_name . ', ' . $bibliographicItem->year;
@@ -121,7 +125,7 @@ class BiblioTable
                 $fullReference = $fullAuthors . ' ' . $bibliographicItem->year . '. ';
             }
             if ($bibliographicItem->journal) {
-                $fullReference .= '"' . $bibliographicItem->year . '", <i>' . $bibliographicItem->journal . '</i>: ';
+                $fullReference .= '"' . $bibliographicItem->title . '", <i>' . $bibliographicItem->journal . '</i>: ';
                 $fullReference .= $bibliographicItem->issue . ': ' . $bibliographicItem->pages;
             } else {
                 $fullReference .= '<i>' . $bibliographicItem->title . '</i> ';
