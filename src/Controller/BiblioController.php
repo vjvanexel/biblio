@@ -199,7 +199,7 @@ class BiblioController extends AbstractActionController
             return $this->redirect()->toRoute('site', ['action' => 'addBiblio']);
         }
         try {
-            $biblioRow = $this->biblioTable->getBibliography($id);
+            $biblioRow = $this->biblioTable->getBibliography([$id => "bibliog_id=$id"]);
             $biblio = $biblioRow[$id]['object'];
         } catch (\Exception $e) {
             return $this->redirect()->toRoute('biblio', ['action' => 'index']);
