@@ -69,7 +69,7 @@ class ReferencesTable
         
         $biblioCollection = [];
         foreach ($referenceResults as $reference) {
-            $biblioItem = $this->biblioTable->getBibliography($reference->bibliog_id);
+            $biblioItem = $this->biblioTable->getBibliography([$reference->bibliog_id => "bibliog_id = $reference->bibliog_id"]);
             $biblioCollection[$reference->bibliog_id] = $biblioItem[$reference->bibliog_id];
             $biblioCollection[$reference->bibliog_id]['ref_note'] = $reference->bibliog_note;
         }
